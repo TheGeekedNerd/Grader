@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Grader</string>
+
+    <string-array name="assessment_categories">
+        <item>Lab Test</item>
+        <item>Theory Test</item>
+        <item>Quiz</item>
+        <item>Lab Submissions</item>
+        <item>Assignment</item>
+        <item>Other</item>
+    </string-array>
+</resources>
