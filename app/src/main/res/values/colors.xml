@@ -10,4 +10,6 @@
     <color name="peach">#F4E0DB</color>
     <color name="dark_navy">#28384F</color>
     <color name="grey">#808080</color>
+    <color name="app_background">#28384F</color>
+
 </resources>
