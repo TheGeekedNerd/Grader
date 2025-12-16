@@ -8,8 +8,10 @@
     <Spinner
         android:id="@+id/categorySpinner"
         android:layout_width="match_parent"
-        android:textColor="@color/black"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:background="@drawable/spinner_background"
+        android:popupBackground="@color/white"
+        android:padding="12dp" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -22,36 +24,35 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:textColor="@color/black"
             android:hint="e.g. 15/20"
-            android:textColorHint="@color/grey"
-            android:inputType="text" />
+            android:textColor="@color/black"
+            android:textColorHint="@color/grey" />
 
         <TextView
             android:id="@+id/percentageTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="0%"
             android:textColor="@color/black"
-            android:padding="8dp"
-            android:text="0%" />
+            android:padding="8dp" />
 
         <EditText
             android:id="@+id/weightEditText"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="0.5"
-            android:textColor="@color/black"
-            android:textColorHint="@color/grey"
             android:hint="Weight"
-            android:inputType="numberDecimal" />
+            android:inputType="numberDecimal"
+            android:textColor="@color/black"
+            android:textColorHint="@color/grey" />
 
         <Button
             android:id="@+id/deleteRowButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="Delete"
             android:textColor="@color/white"
-            android:backgroundTint="@color/dark_navy"
-            android:text="Delete" />
+            android:backgroundTint="@color/dark_navy" />
     </LinearLayout>
 
 </LinearLayout>
