@@ -17,7 +17,7 @@ public class CardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final int TYPE_ITEM = 0;
     private static final int TYPE_ADD_BUTTON = 1;
 
-    private ArrayList<CardItem> cardList;
+    private ArrayList<Course> courseList;
 
     // Listener for when the Add button is clicked
     private OnAddClickListener addClickListener;
@@ -42,8 +42,8 @@ public class CardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     // -------------------------------
     // Constructor
     // -------------------------------
-    public CardAdapter(ArrayList<CardItem> cardList) {
-        this.cardList = cardList;
+    public CardAdapter(ArrayList<Course> courseList) {
+        this.courseList = courseList;
     }
 
     // Set the Add button listener
@@ -63,13 +63,13 @@ public class CardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public int getItemViewType(int position) {
         // Last row (after all cards) = the Add button
-        return (position == cardList.size()) ? TYPE_ADD_BUTTON : TYPE_ITEM;
+        return (position == courseList.size()) ? TYPE_ADD_BUTTON : TYPE_ITEM;
     }
 
     @Override
     public int getItemCount() {
         // +1 because we add the "Add" button card at the bottom
-        return cardList.size() + 1;
+        return courseList.size() + 1;
     }
 
     @NonNull
@@ -98,7 +98,7 @@ public class CardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     ) {
         if (holder.getItemViewType() == TYPE_ITEM) {
             // Normal card item
-            CardItem item = cardList.get(position);
+            Course item = courseList.get(position);
             ItemViewHolder vh = (ItemViewHolder) holder;
 
             vh.title.setText(item.getTitle());
@@ -125,7 +125,7 @@ public class CardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             deleteBtn.setOnClickListener(v -> {
                 int pos = getAdapterPosition();
                 if (pos != RecyclerView.NO_POSITION) {
-                    cardList.remove(pos);
+                    courseList.remove(pos);
                     notifyItemRemoved(pos);
                 }
             });
@@ -164,8 +164,8 @@ public class CardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     // -------------------------------
     // Add new card externally
     // -------------------------------
-    public void addItem(CardItem item) {
-        cardList.add(item);
-        notifyItemInserted(cardList.size() - 1);
+    public void addItem(Course item) {
+        courseList.add(item);
+        notifyItemInserted(courseList.size() - 1);
     }
 }

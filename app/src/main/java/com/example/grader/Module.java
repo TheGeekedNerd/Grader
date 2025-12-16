@@ -1,91 +1,99 @@
 package com.example.grader;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import androidx.activity.result.ActivityResultLauncher; // New Import
-import androidx.activity.result.contract.ActivityResultContracts; // New Import
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 public class Module extends AppCompatActivity {
 
-    private ArrayList<CardItem> cardList;
+    private ArrayList<Course> courseList;
     private CardAdapter adapter;
+    private ActivityResultLauncher<Intent> editCardLauncher;
 
-    // Declare the launcher to handle results from FormActivity
-    private ActivityResultLauncher<Intent> editCardLauncher; // New Declaration
+    private static final String PREFS_NAME = "com.example.grader.prefs";
+    private static final String KEY_COURSES = "courses";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_module);
 
+        loadData();
+
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
+        adapter = new CardAdapter(courseList);
 
-        // Create empty list for the cards
-        cardList = new ArrayList<>();
-
-        // Initialize adapter
-        adapter = new CardAdapter(cardList);
-
-        // 1. Initialize the Activity Result Launcher
         editCardLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
-                    // Check if the result is OK (saved successfully)
                     if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                         Intent data = result.getData();
-
-                        // Retrieve updated data and position sent from FormActivity
-                        String newTitle = data.getStringExtra("title");
-                        String newDesc = data.getStringExtra("description");
+                        Course course = (Course) data.getSerializableExtra(FormActivity.EXTRA_COURSE);
                         int position = data.getIntExtra("position", -1);
 
-                        // Update the specific card in the list
-                        if (position != -1 && position < cardList.size()) {
-                            CardItem item = cardList.get(position);
-                            item.setTitle(newTitle); // Use the new setter method
-                            item.setDescription(newDesc); // Use the new setter method
-
-                            // Notify the adapter to refresh only the updated item's view
-                            adapter.notifyItemChanged(position);
+                        if (course != null) {
+                            if (position != -1 && position < courseList.size()) {
+                                courseList.set(position, course);
+                                adapter.notifyItemChanged(position);
+                            } else {
+                                courseList.add(course);
+                                adapter.notifyItemInserted(courseList.size() - 1);
+                            }
                         }
                     }
                 }
         );
 
-        // ---------------------------
-        // Add button clicked (bottom button in recyclerview)
-        // ---------------------------
         adapter.setOnAddClickListener(() -> {
-            // Add a new card with default title + description
-            CardItem newCard = new CardItem("", "");
-            adapter.addItem(newCard);
-        });
-
-        // ---------------------------
-        // Card clicked → open form page
-        // ---------------------------
-        adapter.setOnCardClickListener(position -> {
-            CardItem clickedCard = cardList.get(position);
-
-            // Open the form activity (you must create FormActivity)
             Intent intent = new Intent(Module.this, FormActivity.class);
-
-            // Pass card details into form screen
-            intent.putExtra("title", clickedCard.getTitle());
-            intent.putExtra("description", clickedCard.getDescription());
-            intent.putExtra("position", position); // Pass position for updating
-
-            // Use the LAUNCHER instead of startActivity
             editCardLauncher.launch(intent);
         });
 
-        // Setup RecyclerView
+        adapter.setOnCardClickListener(position -> {
+            Course clickedCourse = courseList.get(position);
+            Intent intent = new Intent(Module.this, FormActivity.class);
+            intent.putExtra(FormActivity.EXTRA_COURSE, clickedCourse);
+            intent.putExtra("position", position);
+            editCardLauncher.launch(intent);
+        });
+
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        saveData();
+    }
+
+    private void loadData() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        String json = prefs.getString(KEY_COURSES, null);
+        Gson gson = new Gson();
+        Type type = new TypeToken<ArrayList<Course>>() {}.getType();
+        courseList = gson.fromJson(json, type);
+
+        if (courseList == null) {
+            courseList = new ArrayList<>();
+        }
+    }
+
+    private void saveData() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(courseList);
+        editor.putString(KEY_COURSES, json);
+        editor.apply();
     }
 }
