@@ -48,6 +48,7 @@ public class Module extends AppCompatActivity {
                                 courseList.add(course);
                                 adapter.notifyItemInserted(courseList.size() - 1);
                             }
+                            saveData(); // Save data after adding/editing a course
                         }
                     }
                 }
@@ -64,6 +65,12 @@ public class Module extends AppCompatActivity {
             intent.putExtra(FormActivity.EXTRA_COURSE, clickedCourse);
             intent.putExtra("position", position);
             editCardLauncher.launch(intent);
+        });
+
+        adapter.setOnDeleteClickListener(position -> {
+            courseList.remove(position);
+            adapter.notifyItemRemoved(position);
+            saveData(); // Save data after deleting a course
         });
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));

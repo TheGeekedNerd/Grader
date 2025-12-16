@@ -25,6 +25,8 @@ public class CardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     // Listener for when a card itself is clicked
     private OnCardClickListener cardClickListener;
 
+    private OnDeleteClickListener deleteClickListener;
+
     // -------------------------------
     // Listener Interfaces
     // -------------------------------
@@ -37,6 +39,10 @@ public class CardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     // For clicking a card
     public interface OnCardClickListener {
         void onCardClicked(int position);
+    }
+
+    public interface OnDeleteClickListener {
+        void onDeleteClicked(int position);
     }
 
     // -------------------------------
@@ -54,6 +60,10 @@ public class CardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     // Set the card click listener
     public void setOnCardClickListener(OnCardClickListener listener) {
         this.cardClickListener = listener;
+    }
+
+    public void setOnDeleteClickListener(OnDeleteClickListener listener) {
+        this.deleteClickListener = listener;
     }
 
     // -------------------------------
@@ -124,9 +134,8 @@ public class CardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             // Delete button removes the item from the list
             deleteBtn.setOnClickListener(v -> {
                 int pos = getAdapterPosition();
-                if (pos != RecyclerView.NO_POSITION) {
-                    courseList.remove(pos);
-                    notifyItemRemoved(pos);
+                if (pos != RecyclerView.NO_POSITION && deleteClickListener != null) {
+                    deleteClickListener.onDeleteClicked(pos);
                 }
             });
 
