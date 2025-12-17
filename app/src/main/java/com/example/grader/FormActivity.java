@@ -19,9 +19,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class FormActivity extends AppCompatActivity {
 
@@ -183,30 +181,30 @@ public class FormActivity extends AppCompatActivity {
     }
 
     private void calculateTotalGrade() {
-        Map<String, List<Double>> categoryScores = new HashMap<>();
-        Map<String, Double> categoryWeights = new HashMap<>();
-
+        double total = 0;
         for (int i = 0; i < assessmentsContainer.getChildCount(); i++) {
             View row = assessmentsContainer.getChildAt(i);
 
-            Spinner spinner = row.findViewById(R.id.categorySpinner);
             TextView percentageText = row.findViewById(R.id.percentageTextView);
             EditText weightEdit = row.findViewById(R.id.weightEditText);
 
-            String category = spinner.getSelectedItem().toString();
-            double percentage = Double.parseDouble(percentageText.getText().toString().replace("%", ""));
-            double weight = weightEdit.getText().toString().isEmpty() ? 0 :
-                    Double.parseDouble(weightEdit.getText().toString());
+            double percentage = 0;
+            try {
+                percentage = Double.parseDouble(percentageText.getText().toString().replace("%", ""));
+            } catch (NumberFormatException e) {
+                // Ignore if the percentage is not a valid number
+            }
+            
+            double weight = 0;
+            if (!weightEdit.getText().toString().isEmpty()) {
+                try {
+                    weight = Double.parseDouble(weightEdit.getText().toString());
+                } catch (NumberFormatException e) {
+                    // Ignore if the weight is not a valid number
+                }
+            }
 
-            categoryScores.computeIfAbsent(category, k -> new ArrayList<>()).add(percentage);
-            categoryWeights.put(category, weight);
-        }
-
-        double total = 0;
-        for (String category : categoryScores.keySet()) {
-            List<Double> scores = categoryScores.get(category);
-            double avg = scores.stream().mapToDouble(Double::doubleValue).average().orElse(0);
-            total += (avg / 100) * categoryWeights.get(category);
+            total += (percentage / 100) * weight;
         }
 
         totalGradeTextView.setText(String.format("Total Grade: %.2f%%", total));
