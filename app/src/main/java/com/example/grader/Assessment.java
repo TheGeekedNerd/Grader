@@ -6,11 +6,13 @@ public class Assessment implements Serializable {
     private String category;
     private String marks;
     private String weight;
+    private int assessmentNumber;
 
-    public Assessment(String category, String marks, String weight) {
+    public Assessment(String category, String marks, String weight, int assessmentNumber) {
         this.category = category;
         this.marks = marks;
         this.weight = weight;
+        this.assessmentNumber = assessmentNumber;
     }
 
     public String getCategory() {
@@ -23,5 +25,9 @@ public class Assessment implements Serializable {
 
     public String getWeight() {
         return weight;
+    }
+
+    public int getAssessmentNumber() {
+        return assessmentNumber;
     }
 }

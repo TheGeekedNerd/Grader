@@ -1,69 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:padding="24dp"
-    android:background="@color/peach"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <!-- Title Input -->
-
-    <!-- Description Input -->
-
-    <EditText
-        android:id="@+id/inputTitle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textColor="@color/black"
-        android:textColorHint="@color/grey"
-        android:background="@android:drawable/edit_text"
-        android:hint="Course Name"
-        android:padding="12dp" />
-
-    <EditText
-        android:id="@+id/inputDescription"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:textColor="@color/black"
-        android:textColorHint="@color/grey"
-        android:background="@android:drawable/edit_text"
-        android:hint="Course Code"
-        android:padding="12dp" />
-
-    <Button
-        android:id="@+id/addAssessmentButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:textColor="@color/white"
-        android:backgroundTint="@color/dark_navy"
-        android:text="Add Assessment" />
+    android:layout_height="match_parent"
+    android:background="@color/peach"
+    android:padding="24dp">
 
     <LinearLayout
-        android:id="@+id/assessmentsContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical" />
+        android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/totalGradeTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="@color/black"
-        android:layout_marginTop="16dp"
-        android:text="Total Grade: 0%"
-        android:textSize="18sp"
-        android:textStyle="bold" />
+        <!-- Title Input -->
 
-    <!-- Save Button -->
-    <Button
-        android:id="@+id/btnSave"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="@color/white"
-        android:layout_marginTop="24dp"
-        android:backgroundTint="@color/dark_navy"
-        android:text="Save" />
+        <!-- Description Input -->
 
-</LinearLayout>
+        <EditText
+            android:id="@+id/inputTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColorHint="@color/grey"
+            android:background="@android:drawable/edit_text"
+            android:hint="Course Name"
+            android:padding="12dp" />
+
+        <EditText
+            android:id="@+id/inputDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:textColorHint="@color/grey"
+            android:background="@android:drawable/edit_text"
+            android:hint="Course Code"
+            android:padding="12dp" />
+
+        <Button
+            android:id="@+id/addAssessmentButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/dark_navy"
+            android:layout_marginTop="16dp"
+            android:textColor="@color/white"
+            android:text="Add Assessment" />
+
+        <LinearLayout
+            android:id="@+id/assessmentsContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+        <TextView
+            android:id="@+id/totalGradeTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:textColor="@color/black"
+            android:text="Total Grade: 0%"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <!-- Save Button -->
+        <Button
+            android:id="@+id/btnSave"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:backgroundTint="@color/dark_navy"
+            android:textColor="@color/white"
+            android:text="Save" />
+
+    </LinearLayout>
+</ScrollView>

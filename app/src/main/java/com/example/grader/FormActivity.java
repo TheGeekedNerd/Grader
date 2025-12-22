@@ -78,14 +78,16 @@ public class FormActivity extends AppCompatActivity {
                 View row = assessmentsContainer.getChildAt(i);
 
                 Spinner categorySpinner = row.findViewById(R.id.categorySpinner);
+                Spinner numberSpinner = row.findViewById(R.id.numberSpinner);
                 EditText marksEditText = row.findViewById(R.id.marksEditText);
                 EditText weightEditText = row.findViewById(R.id.weightEditText);
 
                 String category = categorySpinner.getSelectedItem().toString();
+                int assessmentNumber = (int) numberSpinner.getSelectedItem();
                 String marks = marksEditText.getText().toString();
                 String weight = weightEditText.getText().toString();
 
-                assessments.add(new Assessment(category, marks, weight));
+                assessments.add(new Assessment(category, marks, weight, assessmentNumber));
             }
 
             Course course = new Course(title, desc, assessments);
@@ -106,19 +108,29 @@ public class FormActivity extends AppCompatActivity {
         View rowView = inflater.inflate(R.layout.assessment_row, null);
 
         Spinner categorySpinner = rowView.findViewById(R.id.categorySpinner);
+        Spinner numberSpinner = rowView.findViewById(R.id.numberSpinner);
         EditText marksEditText = rowView.findViewById(R.id.marksEditText);
         EditText weightEditText = rowView.findViewById(R.id.weightEditText);
         TextView percentageTextView = rowView.findViewById(R.id.percentageTextView);
         Button deleteRowButton = rowView.findViewById(R.id.deleteRowButton);
 
-        ArrayAdapter<CharSequence> adapter =
+        ArrayAdapter<CharSequence> categoryAdapter =
                 ArrayAdapter.createFromResource(
                         this,
                         R.array.assessment_categories,
                         R.layout.spinner_item
                 );
-        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-        categorySpinner.setAdapter(adapter);
+        categoryAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        categorySpinner.setAdapter(categoryAdapter);
+
+        List<Integer> numbers = new ArrayList<>();
+        for (int i = 1; i <= 50; i++) {
+            numbers.add(i);
+        }
+        ArrayAdapter<Integer> numberAdapter = new ArrayAdapter<>(this, R.layout.spinner_item, numbers);
+        numberAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        numberSpinner.setAdapter(numberAdapter);
+
 
         if (assessment != null) {
             marksEditText.setText(assessment.getMarks());
@@ -126,12 +138,15 @@ public class FormActivity extends AppCompatActivity {
 
             updatePercentage(assessment.getMarks(), percentageTextView);
 
-            for (int i = 0; i < adapter.getCount(); i++) {
-                if (adapter.getItem(i).toString().equals(assessment.getCategory())) {
+            for (int i = 0; i < categoryAdapter.getCount(); i++) {
+                if (categoryAdapter.getItem(i).toString().equals(assessment.getCategory())) {
                     categorySpinner.setSelection(i);
                     break;
                 }
             }
+
+            numberSpinner.setSelection(assessment.getAssessmentNumber() - 1);
+
         }
 
         marksEditText.addTextChangedListener(new TextWatcher() {
@@ -154,6 +169,13 @@ public class FormActivity extends AppCompatActivity {
             }
         });
 
+        numberSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override public void onNothingSelected(AdapterView<?> parent) {}
+            @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                // No action needed on selection, will be saved on "Save" button click.
+            }
+        });
+
         deleteRowButton.setOnClickListener(v -> {
             assessmentsContainer.removeView(rowView);
             calculateTotalGrade();
@@ -171,6 +193,8 @@ public class FormActivity extends AppCompatActivity {
                 if (total != 0) {
                     double percentage = (obtained / total) * 100;
                     percentageTextView.setText(String.format("%.2f%%", percentage));
+                } else {
+                    percentageTextView.setText("0%");
                 }
             } else {
                 percentageTextView.setText("0%");
@@ -182,6 +206,8 @@ public class FormActivity extends AppCompatActivity {
 
     private void calculateTotalGrade() {
         double total = 0;
+        boolean isInvalid = false;
+
         for (int i = 0; i < assessmentsContainer.getChildCount(); i++) {
             View row = assessmentsContainer.getChildAt(i);
 
@@ -194,7 +220,7 @@ public class FormActivity extends AppCompatActivity {
             } catch (NumberFormatException e) {
                 // Ignore if the percentage is not a valid number
             }
-            
+
             double weight = 0;
             if (!weightEdit.getText().toString().isEmpty()) {
                 try {
@@ -204,7 +230,16 @@ public class FormActivity extends AppCompatActivity {
                 }
             }
 
+            if (percentage > 100 || weight > 100) {
+                isInvalid = true;
+                break;
+            }
+
             total += (percentage / 100) * weight;
+        }
+
+        if (isInvalid) {
+            total = 0;
         }
 
         totalGradeTextView.setText(String.format("Total Grade: %.2f%%", total));
