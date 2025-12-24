@@ -56,6 +56,7 @@ public class Module extends AppCompatActivity {
 
         adapter.setOnAddClickListener(() -> {
             Intent intent = new Intent(Module.this, FormActivity.class);
+            intent.putExtra("courseList", courseList);
             editCardLauncher.launch(intent);
         });
 
@@ -64,6 +65,7 @@ public class Module extends AppCompatActivity {
             Intent intent = new Intent(Module.this, FormActivity.class);
             intent.putExtra(FormActivity.EXTRA_COURSE, clickedCourse);
             intent.putExtra("position", position);
+            intent.putExtra("courseList", courseList);
             editCardLauncher.launch(intent);
         });
 

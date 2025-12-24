@@ -15,11 +15,16 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class FormActivity extends AppCompatActivity {
 
@@ -27,6 +32,8 @@ public class FormActivity extends AppCompatActivity {
     private Button btnSave, addAssessmentButton;
     private LinearLayout assessmentsContainer;
     private TextView totalGradeTextView;
+    private ArrayList<Course> courseList;
+    private int currentCoursePosition = -1;
 
     public static final String EXTRA_COURSE = "com.example.grader.COURSE";
 
@@ -45,13 +52,19 @@ public class FormActivity extends AppCompatActivity {
         addAssessmentButton.setOnClickListener(v -> addAssessmentRow(null));
 
         Intent incomingIntent = getIntent();
-        if (incomingIntent != null && incomingIntent.hasExtra(EXTRA_COURSE)) {
-            Course course = (Course) incomingIntent.getSerializableExtra(EXTRA_COURSE);
-            if (course != null) {
-                inputTitle.setText(course.getTitle());
-                inputDescription.setText(course.getDescription());
-                if (course.getAssessments() != null) {
-                    for (Assessment assessment : course.getAssessments()) {
+        courseList = (ArrayList<Course>) incomingIntent.getSerializableExtra("courseList");
+        if (courseList == null) {
+            courseList = new ArrayList<>();
+        }
+        currentCoursePosition = incomingIntent.getIntExtra("position", -1);
+
+        if (incomingIntent.hasExtra(EXTRA_COURSE)) {
+            Course currentCourse = (Course) incomingIntent.getSerializableExtra(EXTRA_COURSE);
+            if (currentCourse != null) {
+                inputTitle.setText(currentCourse.getTitle());
+                inputDescription.setText(currentCourse.getDescription());
+                if (currentCourse.getAssessments() != null) {
+                    for (Assessment assessment : currentCourse.getAssessments()) {
                         addAssessmentRow(assessment);
                     }
                 }
@@ -72,6 +85,22 @@ public class FormActivity extends AppCompatActivity {
                 return;
             }
 
+            for (int i = 0; i < courseList.size(); i++) {
+                if (i == currentCoursePosition) {
+                    continue;
+                }
+                Course course = courseList.get(i);
+                if (course.getTitle().equals(title) || course.getDescription().equals(desc)) {
+                    Toast.makeText(this, "A module with the same name or code already exists.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+            }
+
+            if (!areAssessmentsValid()) {
+                Toast.makeText(this, "Two assessments of the same category cannot have the same number", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             List<Assessment> assessments = new ArrayList<>();
 
             for (int i = 0; i < assessmentsContainer.getChildCount(); i++) {
@@ -81,19 +110,26 @@ public class FormActivity extends AppCompatActivity {
                 Spinner numberSpinner = row.findViewById(R.id.numberSpinner);
                 EditText marksEditText = row.findViewById(R.id.marksEditText);
                 EditText weightEditText = row.findViewById(R.id.weightEditText);
+                EditText otherCategoryEditText = row.findViewById(R.id.otherCategoryEditText);
 
                 String category = categorySpinner.getSelectedItem().toString();
+                String otherCategoryName = null;
+                if(category.equals("Other")) {
+                    otherCategoryName = otherCategoryEditText.getText().toString();
+                }
                 int assessmentNumber = (int) numberSpinner.getSelectedItem();
                 String marks = marksEditText.getText().toString();
                 String weight = weightEditText.getText().toString();
 
-                assessments.add(new Assessment(category, marks, weight, assessmentNumber));
+                assessments.add(new Assessment(category, marks, weight, assessmentNumber, otherCategoryName));
             }
 
             Course course = new Course(title, desc, assessments);
 
             Intent resultIntent = new Intent();
             resultIntent.putExtra(EXTRA_COURSE, course);
+            resultIntent.putExtra("position", currentCoursePosition);
+
             setResult(RESULT_OK, resultIntent);
             finish();
         });
@@ -113,6 +149,7 @@ public class FormActivity extends AppCompatActivity {
         EditText weightEditText = rowView.findViewById(R.id.weightEditText);
         TextView percentageTextView = rowView.findViewById(R.id.percentageTextView);
         Button deleteRowButton = rowView.findViewById(R.id.deleteRowButton);
+        EditText otherCategoryEditText = rowView.findViewById(R.id.otherCategoryEditText);
 
         ArrayAdapter<CharSequence> categoryAdapter =
                 ArrayAdapter.createFromResource(
@@ -141,6 +178,10 @@ public class FormActivity extends AppCompatActivity {
             for (int i = 0; i < categoryAdapter.getCount(); i++) {
                 if (categoryAdapter.getItem(i).toString().equals(assessment.getCategory())) {
                     categorySpinner.setSelection(i);
+                    if (assessment.getCategory().equals("Other")) {
+                        otherCategoryEditText.setVisibility(View.VISIBLE);
+                        otherCategoryEditText.setText(assessment.getOtherCategoryName());
+                    }
                     break;
                 }
             }
@@ -165,6 +206,19 @@ public class FormActivity extends AppCompatActivity {
         categorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override public void onNothingSelected(AdapterView<?> parent) {}
             @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String selectedCategory = parent.getItemAtPosition(position).toString();
+                if (selectedCategory.equals("Other")) {
+                    otherCategoryEditText.setVisibility(View.VISIBLE);
+                } else {
+                    otherCategoryEditText.setVisibility(View.GONE);
+                }
+
+                if(assessment == null) {
+                    int nextNumber = getNextAssessmentNumber(selectedCategory, rowView);
+                     if (nextNumber <= numberAdapter.getCount()) {
+                        numberSpinner.setSelection(nextNumber - 1);
+                    }
+                }
                 calculateTotalGrade();
             }
         });
@@ -172,7 +226,7 @@ public class FormActivity extends AppCompatActivity {
         numberSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override public void onNothingSelected(AdapterView<?> parent) {}
             @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                // No action needed on selection, will be saved on "Save" button click.
+                 calculateTotalGrade();
             }
         });
 
@@ -182,6 +236,14 @@ public class FormActivity extends AppCompatActivity {
         });
 
         assessmentsContainer.addView(rowView);
+         if(assessment == null) {
+              String selectedCategory = categorySpinner.getSelectedItem().toString();
+              int nextNumber = getNextAssessmentNumber(selectedCategory, rowView);
+              if (nextNumber <= numberAdapter.getCount()) {
+                  numberSpinner.setSelection(nextNumber - 1);
+              }
+         }
+
     }
 
     private void updatePercentage(String marks, TextView percentageTextView) {
@@ -194,7 +256,7 @@ public class FormActivity extends AppCompatActivity {
                     double percentage = (obtained / total) * 100;
                     percentageTextView.setText(String.format("%.2f%%", percentage));
                 } else {
-                    percentageTextView.setText("0%");
+                     percentageTextView.setText("0%");
                 }
             } else {
                 percentageTextView.setText("0%");
@@ -208,6 +270,10 @@ public class FormActivity extends AppCompatActivity {
         double total = 0;
         boolean isInvalid = false;
 
+        if (!areAssessmentsValid()) {
+            isInvalid = true;
+        }
+
         for (int i = 0; i < assessmentsContainer.getChildCount(); i++) {
             View row = assessmentsContainer.getChildAt(i);
 
@@ -218,7 +284,6 @@ public class FormActivity extends AppCompatActivity {
             try {
                 percentage = Double.parseDouble(percentageText.getText().toString().replace("%", ""));
             } catch (NumberFormatException e) {
-                // Ignore if the percentage is not a valid number
             }
 
             double weight = 0;
@@ -226,16 +291,16 @@ public class FormActivity extends AppCompatActivity {
                 try {
                     weight = Double.parseDouble(weightEdit.getText().toString());
                 } catch (NumberFormatException e) {
-                    // Ignore if the weight is not a valid number
                 }
             }
 
             if (percentage > 100 || weight > 100) {
                 isInvalid = true;
-                break;
             }
 
-            total += (percentage / 100) * weight;
+             if (!isInvalid) {
+                total += (percentage / 100) * weight;
+            }
         }
 
         if (isInvalid) {
@@ -244,6 +309,61 @@ public class FormActivity extends AppCompatActivity {
 
         totalGradeTextView.setText(String.format("Total Grade: %.2f%%", total));
     }
+
+    private int getNextAssessmentNumber(String category, View currentRow) {
+        int maxNumber = 0;
+        for (int i = 0; i < assessmentsContainer.getChildCount(); i++) {
+            View row = assessmentsContainer.getChildAt(i);
+            if(row == currentRow) continue;
+
+            Spinner categorySpinner = row.findViewById(R.id.categorySpinner);
+            Spinner numberSpinner = row.findViewById(R.id.numberSpinner);
+            if(categorySpinner != null && categorySpinner.getSelectedItem() != null && numberSpinner != null && numberSpinner.getSelectedItem() != null) {
+                String currentCategory = categorySpinner.getSelectedItem().toString();
+                if (currentCategory.equals("Other")) {
+                    EditText otherCategoryEditText = row.findViewById(R.id.otherCategoryEditText);
+                    currentCategory = otherCategoryEditText.getText().toString();
+                }
+                if (currentCategory.equals(category)) {
+                    int currentNumber = (int) numberSpinner.getSelectedItem();
+                    if (currentNumber > maxNumber) {
+                        maxNumber = currentNumber;
+                    }
+                }
+            }
+        }
+        return maxNumber + 1;
+    }
+
+    private boolean areAssessmentsValid() {
+        Map<String, Set<Integer>> categoryNumbers = new HashMap<>();
+
+        for (int i = 0; i < assessmentsContainer.getChildCount(); i++) {
+            View row = assessmentsContainer.getChildAt(i);
+            Spinner categorySpinner = row.findViewById(R.id.categorySpinner);
+            Spinner numberSpinner = row.findViewById(R.id.numberSpinner);
+            
+            if (categorySpinner != null && categorySpinner.getSelectedItem() != null && numberSpinner != null && numberSpinner.getSelectedItem() != null) {
+                String category = categorySpinner.getSelectedItem().toString();
+                 if (category.equals("Other")) {
+                    EditText otherCategoryEditText = row.findViewById(R.id.otherCategoryEditText);
+                    category = otherCategoryEditText.getText().toString();
+                }
+                int number = (int) numberSpinner.getSelectedItem();
+
+                if (!categoryNumbers.containsKey(category)) {
+                    categoryNumbers.put(category, new HashSet<>());
+                }
+
+                if (!categoryNumbers.get(category).add(number)) {
+                    return false; 
+                }
+            }
+        }
+
+        return true;
+    }
+
 
     private static class SimpleTextWatcher implements TextWatcher {
         private final Runnable callback;

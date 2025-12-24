@@ -7,12 +7,14 @@ public class Assessment implements Serializable {
     private String marks;
     private String weight;
     private int assessmentNumber;
+    private String otherCategoryName;
 
-    public Assessment(String category, String marks, String weight, int assessmentNumber) {
+    public Assessment(String category, String marks, String weight, int assessmentNumber, String otherCategoryName) {
         this.category = category;
         this.marks = marks;
         this.weight = weight;
         this.assessmentNumber = assessmentNumber;
+        this.otherCategoryName = otherCategoryName;
     }
 
     public String getCategory() {
@@ -29,5 +31,9 @@ public class Assessment implements Serializable {
 
     public int getAssessmentNumber() {
         return assessmentNumber;
+    }
+
+    public String getOtherCategoryName() {
+        return otherCategoryName;
     }
 }

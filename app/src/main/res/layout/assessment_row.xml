@@ -3,11 +3,15 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="8dp">
+    android:padding="8dp"
+    android:layout_marginBottom="8dp"
+    android:background="@android:drawable/dialog_holo_light_frame">
 
+    <!-- First Row: Category and Number -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center_vertical"
         android:orientation="horizontal">
 
         <Spinner
@@ -15,23 +19,48 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:background="@drawable/spinner_background"
-            android:padding="12dp"
-            android:popupBackground="@color/white" />
+            android:backgroundTint="@color/black"
+            android:layout_marginEnd="8dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="#"
+            android:textColor="@color/black"
+            android:textStyle="bold"/>
 
         <Spinner
             android:id="@+id/numberSpinner"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="12dp" />
-
+            android:backgroundTint="@color/black"
+            android:layout_marginStart="8dp"/>
     </LinearLayout>
 
+    <EditText
+        android:id="@+id/otherCategoryEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter Assessment Name"
+        android:backgroundTint="@color/grey"
+        android:textColor="@color/black"
+        android:textColorHint="@color/grey"
+        android:visibility="gone"
+        android:layout_marginTop="8dp"/>
+
+    <!-- Second Row: Marks, Weight, Percentage -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
+        android:gravity="center_vertical"
         android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:text="Marks:"/>
 
         <EditText
             android:id="@+id/marksEditText"
@@ -39,34 +68,53 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:hint="e.g. 15/20"
+            android:backgroundTint="@color/grey"
             android:textColor="@color/black"
-            android:textColorHint="@color/grey" />
+            android:textColorHint="@color/grey"
+            android:layout_marginStart="8dp"/>
+
+         <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+             android:textColor="@color/black"
+            android:text="Weight:"
+            android:layout_marginStart="8dp"/>
+
+        <EditText
+            android:id="@+id/weightEditText"
+            android:layout_width="wrap_content"
+            android:minWidth="60dp"
+            android:hint="e.g. 20"
+            android:textColor="@color/black"
+            android:textColorHint="@color/grey"
+            android:backgroundTint="@color/grey"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal" />
 
         <TextView
             android:id="@+id/percentageTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:text="0%"
-            android:textColor="@color/black" />
-
-        <EditText
-            android:id="@+id/weightEditText"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.5"
-            android:hint="Weight"
-            android:inputType="numberDecimal"
+            android:layout_marginStart="8dp"
             android:textColor="@color/black"
-            android:textColorHint="@color/grey" />
+            android:text="0%"/>
+
+    </LinearLayout>
+    
+    <!-- Third Row: Delete Button -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp">
 
         <Button
             android:id="@+id/deleteRowButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
             android:backgroundTint="@color/dark_navy"
-            android:text="Delete"
-            android:textColor="@color/white" />
-    </LinearLayout>
+            android:textColor="@color/white"
+            android:text="Delete"/>
+    </RelativeLayout>
 
 </LinearLayout>
