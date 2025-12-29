@@ -18,6 +18,7 @@
             android:id="@+id/inputTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@color/black"
             android:textColorHint="@color/grey"
             android:background="@android:drawable/edit_text"
             android:hint="Course Name"
@@ -28,10 +29,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:textColor="@color/black"
             android:textColorHint="@color/grey"
             android:background="@android:drawable/edit_text"
             android:hint="Course Code"
-            android:padding="12dp" />
+            android.padding="12dp" />
 
         <Button
             android:id="@+id/addAssessmentButton"

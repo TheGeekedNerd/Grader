@@ -72,7 +72,7 @@ public class FormActivity extends AppCompatActivity {
         }
 
         btnSave.setOnClickListener(v -> {
-            String title = inputTitle.getText().toString().trim();
+            String title = inputTitle.getText().toString().trim().toUpperCase();
             String desc = inputDescription.getText().toString().trim();
 
             if (TextUtils.isEmpty(title)) {
