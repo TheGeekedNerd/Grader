@@ -73,7 +73,7 @@ public class FormActivity extends AppCompatActivity {
 
         btnSave.setOnClickListener(v -> {
             String title = inputTitle.getText().toString().trim().toUpperCase();
-            String desc = inputDescription.getText().toString().trim().toUpperCase();
+            String desc = inputDescription.getText().toString().trim();
 
             if (TextUtils.isEmpty(title)) {
                 inputTitle.setError("Course name is required");
@@ -120,6 +120,16 @@ public class FormActivity extends AppCompatActivity {
                 int assessmentNumber = (int) numberSpinner.getSelectedItem();
                 String marks = marksEditText.getText().toString();
                 String weight = weightEditText.getText().toString();
+
+                if (TextUtils.isEmpty(marks)) {
+                    Toast.makeText(this, "Please enter marks for all assessments.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if (TextUtils.isEmpty(weight)) {
+                    Toast.makeText(this, "Please enter a weight for all assessments.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
                 assessments.add(new Assessment(category, marks, weight, assessmentNumber, otherCategoryName));
             }
