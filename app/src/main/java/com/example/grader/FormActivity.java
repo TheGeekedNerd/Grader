@@ -73,7 +73,7 @@ public class FormActivity extends AppCompatActivity {
 
         btnSave.setOnClickListener(v -> {
             String title = inputTitle.getText().toString().trim().toUpperCase();
-            String desc = inputDescription.getText().toString().trim();
+            String desc = inputDescription.getText().toString().trim().toUpperCase();
 
             if (TextUtils.isEmpty(title)) {
                 inputTitle.setError("Course name is required");
