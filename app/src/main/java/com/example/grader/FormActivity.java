@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -114,7 +115,7 @@ public class FormActivity extends AppCompatActivity {
 
                 String category = categorySpinner.getSelectedItem().toString();
                 String otherCategoryName = null;
-                if(category.equals("Other")) {
+                if (category.equals("Other")) {
                     otherCategoryName = otherCategoryEditText.getText().toString();
                 }
                 int assessmentNumber = (int) numberSpinner.getSelectedItem();
@@ -178,7 +179,6 @@ public class FormActivity extends AppCompatActivity {
         numberAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         numberSpinner.setAdapter(numberAdapter);
 
-
         if (assessment != null) {
             marksEditText.setText(assessment.getMarks());
             weightEditText.setText(assessment.getWeight());
@@ -197,7 +197,6 @@ public class FormActivity extends AppCompatActivity {
             }
 
             numberSpinner.setSelection(assessment.getAssessmentNumber() - 1);
-
         }
 
         marksEditText.addTextChangedListener(new TextWatcher() {
@@ -223,9 +222,9 @@ public class FormActivity extends AppCompatActivity {
                     otherCategoryEditText.setVisibility(View.GONE);
                 }
 
-                if(assessment == null) {
+                if (assessment == null) {
                     int nextNumber = getNextAssessmentNumber(selectedCategory, rowView);
-                     if (nextNumber <= numberAdapter.getCount()) {
+                    if (nextNumber <= numberAdapter.getCount()) {
                         numberSpinner.setSelection(nextNumber - 1);
                     }
                 }
@@ -236,7 +235,7 @@ public class FormActivity extends AppCompatActivity {
         numberSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override public void onNothingSelected(AdapterView<?> parent) {}
             @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                 calculateTotalGrade();
+                calculateTotalGrade();
             }
         });
 
@@ -246,14 +245,13 @@ public class FormActivity extends AppCompatActivity {
         });
 
         assessmentsContainer.addView(rowView);
-         if(assessment == null) {
-              String selectedCategory = categorySpinner.getSelectedItem().toString();
-              int nextNumber = getNextAssessmentNumber(selectedCategory, rowView);
-              if (nextNumber <= numberAdapter.getCount()) {
-                  numberSpinner.setSelection(nextNumber - 1);
-              }
-         }
-
+        if (assessment == null) {
+            String selectedCategory = categorySpinner.getSelectedItem().toString();
+            int nextNumber = getNextAssessmentNumber(selectedCategory, rowView);
+            if (nextNumber <= numberAdapter.getCount()) {
+                numberSpinner.setSelection(nextNumber - 1);
+            }
+        }
     }
 
     private void updatePercentage(String marks, TextView percentageTextView) {
@@ -264,9 +262,10 @@ public class FormActivity extends AppCompatActivity {
                 double total = Double.parseDouble(parts[1].trim());
                 if (total != 0) {
                     double percentage = (obtained / total) * 100;
-                    percentageTextView.setText(String.format("%.2f%%", percentage));
+                    // FIX: Use Locale.US to ensure consistent decimal formatting across devices
+                    percentageTextView.setText(String.format(Locale.US, "%.2f%%", percentage));
                 } else {
-                     percentageTextView.setText("0%");
+                    percentageTextView.setText("0%");
                 }
             } else {
                 percentageTextView.setText("0%");
@@ -278,11 +277,8 @@ public class FormActivity extends AppCompatActivity {
 
     private void calculateTotalGrade() {
         double total = 0;
-        boolean isInvalid = false;
-
-        if (!areAssessmentsValid()) {
-            isInvalid = true;
-        }
+        // FIX: Check validity once before the loop, not inside it
+        boolean isInvalid = !areAssessmentsValid();
 
         for (int i = 0; i < assessmentsContainer.getChildCount(); i++) {
             View row = assessmentsContainer.getChildAt(i);
@@ -292,8 +288,11 @@ public class FormActivity extends AppCompatActivity {
 
             double percentage = 0;
             try {
-                percentage = Double.parseDouble(percentageText.getText().toString().replace("%", ""));
+                percentage = Double.parseDouble(
+                        percentageText.getText().toString().replace("%", "")
+                );
             } catch (NumberFormatException e) {
+                // leave percentage as 0
             }
 
             double weight = 0;
@@ -301,34 +300,37 @@ public class FormActivity extends AppCompatActivity {
                 try {
                     weight = Double.parseDouble(weightEdit.getText().toString());
                 } catch (NumberFormatException e) {
+                    // leave weight as 0
                 }
             }
 
+            // FIX: If any row is invalid, flag and stop accumulating
             if (percentage > 100 || weight > 100) {
                 isInvalid = true;
+                break;
             }
 
-             if (!isInvalid) {
-                total += (percentage / 100) * weight;
-            }
+            total += (percentage / 100) * weight;
         }
 
         if (isInvalid) {
             total = 0;
         }
 
-        totalGradeTextView.setText(String.format("Total Grade: %.2f%%", total));
+        // FIX: Use Locale.US to ensure consistent decimal formatting across devices
+        totalGradeTextView.setText(String.format(Locale.US, "Total Grade: %.2f%%", total));
     }
 
     private int getNextAssessmentNumber(String category, View currentRow) {
         int maxNumber = 0;
         for (int i = 0; i < assessmentsContainer.getChildCount(); i++) {
             View row = assessmentsContainer.getChildAt(i);
-            if(row == currentRow) continue;
+            if (row == currentRow) continue;
 
             Spinner categorySpinner = row.findViewById(R.id.categorySpinner);
             Spinner numberSpinner = row.findViewById(R.id.numberSpinner);
-            if(categorySpinner != null && categorySpinner.getSelectedItem() != null && numberSpinner != null && numberSpinner.getSelectedItem() != null) {
+            if (categorySpinner != null && categorySpinner.getSelectedItem() != null
+                    && numberSpinner != null && numberSpinner.getSelectedItem() != null) {
                 String currentCategory = categorySpinner.getSelectedItem().toString();
                 if (currentCategory.equals("Other")) {
                     EditText otherCategoryEditText = row.findViewById(R.id.otherCategoryEditText);
@@ -352,10 +354,11 @@ public class FormActivity extends AppCompatActivity {
             View row = assessmentsContainer.getChildAt(i);
             Spinner categorySpinner = row.findViewById(R.id.categorySpinner);
             Spinner numberSpinner = row.findViewById(R.id.numberSpinner);
-            
-            if (categorySpinner != null && categorySpinner.getSelectedItem() != null && numberSpinner != null && numberSpinner.getSelectedItem() != null) {
+
+            if (categorySpinner != null && categorySpinner.getSelectedItem() != null
+                    && numberSpinner != null && numberSpinner.getSelectedItem() != null) {
                 String category = categorySpinner.getSelectedItem().toString();
-                 if (category.equals("Other")) {
+                if (category.equals("Other")) {
                     EditText otherCategoryEditText = row.findViewById(R.id.otherCategoryEditText);
                     category = otherCategoryEditText.getText().toString();
                 }
@@ -366,14 +369,13 @@ public class FormActivity extends AppCompatActivity {
                 }
 
                 if (!categoryNumbers.get(category).add(number)) {
-                    return false; 
+                    return false;
                 }
             }
         }
 
         return true;
     }
-
 
     private static class SimpleTextWatcher implements TextWatcher {
         private final Runnable callback;

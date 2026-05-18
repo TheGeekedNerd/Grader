@@ -10,6 +10,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 public class CardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -31,12 +33,10 @@ public class CardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     // Listener Interfaces
     // -------------------------------
 
-    // For the bottom "Add Item" button
     public interface OnAddClickListener {
         void onAddClicked();
     }
 
-    // For clicking a card
     public interface OnCardClickListener {
         void onCardClicked(int position);
     }
@@ -52,12 +52,10 @@ public class CardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         this.courseList = courseList;
     }
 
-    // Set the Add button listener
     public void setOnAddClickListener(OnAddClickListener listener) {
         this.addClickListener = listener;
     }
 
-    // Set the card click listener
     public void setOnCardClickListener(OnCardClickListener listener) {
         this.cardClickListener = listener;
     }
@@ -72,13 +70,11 @@ public class CardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public int getItemViewType(int position) {
-        // Last row (after all cards) = the Add button
         return (position == courseList.size()) ? TYPE_ADD_BUTTON : TYPE_ITEM;
     }
 
     @Override
     public int getItemCount() {
-        // +1 because we add the "Add" button card at the bottom
         return courseList.size() + 1;
     }
 
@@ -91,11 +87,9 @@ public class CardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
 
         if (viewType == TYPE_ADD_BUTTON) {
-            // Inflate the Add button layout
             View view = inflater.inflate(R.layout.item_add_button, parent, false);
             return new AddViewHolder(view);
         } else {
-            // Inflate normal card layout
             View view = inflater.inflate(R.layout.item_card, parent, false);
             return new ItemViewHolder(view);
         }
@@ -107,13 +101,42 @@ public class CardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             int position
     ) {
         if (holder.getItemViewType() == TYPE_ITEM) {
-            // Normal card item
             Course item = courseList.get(position);
             ItemViewHolder vh = (ItemViewHolder) holder;
 
             vh.title.setText(item.getTitle());
             vh.description.setText(item.getDescription());
+            vh.totalGrade.setText(String.format(Locale.US, "Total Grade: %.2f%%", calculateTotalGrade(item)));
         }
+    }
+
+    // -------------------------------
+    // Total Grade Calculation
+    // -------------------------------
+    private double calculateTotalGrade(Course course) {
+        List<Assessment> assessments = course.getAssessments();
+        if (assessments == null || assessments.isEmpty()) return 0;
+
+        double total = 0;
+        for (Assessment assessment : assessments) {
+            try {
+                String marks = assessment.getMarks();
+                double weight = Double.parseDouble(assessment.getWeight());
+
+                if (marks.contains("/")) {
+                    String[] parts = marks.split("/");
+                    double obtained = Double.parseDouble(parts[0].trim());
+                    double outOf = Double.parseDouble(parts[1].trim());
+                    if (outOf != 0 && weight <= 100) {
+                        double percentage = (obtained / outOf) * 100;
+                        total += (percentage / 100) * weight;
+                    }
+                }
+            } catch (Exception e) {
+                // skip malformed assessment
+            }
+        }
+        return total;
     }
 
     // -------------------------------
@@ -121,7 +144,7 @@ public class CardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     // -------------------------------
     class ItemViewHolder extends RecyclerView.ViewHolder {
 
-        TextView title, description;
+        TextView title, description, totalGrade;
         Button deleteBtn;
 
         public ItemViewHolder(@NonNull View itemView) {
@@ -129,9 +152,9 @@ public class CardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
             title = itemView.findViewById(R.id.cardTitle);
             description = itemView.findViewById(R.id.cardDescription);
+            totalGrade = itemView.findViewById(R.id.cardTotalGrade);
             deleteBtn = itemView.findViewById(R.id.btnDelete);
 
-            // Delete button removes the item from the list
             deleteBtn.setOnClickListener(v -> {
                 int pos = getAdapterPosition();
                 if (pos != RecyclerView.NO_POSITION && deleteClickListener != null) {
@@ -139,7 +162,6 @@ public class CardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 }
             });
 
-            // Clicking the card opens the form/activity
             itemView.setOnClickListener(v -> {
                 int pos = getAdapterPosition();
                 if (pos != RecyclerView.NO_POSITION && cardClickListener != null) {
@@ -161,7 +183,6 @@ public class CardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
             addBtn = itemView.findViewById(R.id.btnAddItem);
 
-            // Clicking Add triggers the listener in Module.java
             addBtn.setOnClickListener(v -> {
                 if (addClickListener != null) {
                     addClickListener.onAddClicked();

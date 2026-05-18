@@ -9,7 +9,6 @@
     card_view:cardElevation="5dp"
     android:clickable="true"
     android:foreground="?attr/selectableItemBackground">
-
     <LinearLayout
         android:orientation="horizontal"
         android:padding="16dp"
@@ -17,14 +16,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical">
-
         <!-- Text Section -->
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content">
-
             <TextView
                 android:id="@+id/cardTitle"
                 android:text="Title"
@@ -33,7 +30,6 @@
                 android:textColor="@android:color/black"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
-
             <TextView
                 android:id="@+id/cardDescription"
                 android:text="Description"
@@ -41,8 +37,16 @@
                 android:textColor="@android:color/black"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
+            <TextView
+                android:id="@+id/cardTotalGrade"
+                android:text="Total Grade: 0.00%"
+                android:textSize="14sp"
+                android:textStyle="italic"
+                android:textColor="@android:color/black"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"/>
         </LinearLayout>
-
         <!-- Delete button -->
         <Button
             android:id="@+id/btnDelete"
@@ -51,7 +55,5 @@
             android:textColor="@color/white"
             android:backgroundTint="@color/dark_navy"
             android:text="Delete"/>
-
     </LinearLayout>
-
 </androidx.cardview.widget.CardView>
